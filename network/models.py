@@ -23,7 +23,7 @@ class User(AbstractUser):
 
 class Post(models.Model):
     """
-    Model to store information about posts users make 
+    Model to store information about posts users make
     """
     author = models.ForeignKey(
         User,
@@ -41,6 +41,11 @@ class Post(models.Model):
     likes = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0)]
+    )
+    liked_by = models.ManyToManyField(
+        User,
+        blank=True, 
+        related_name="liked_by",
     )
     def __str__(self):
         return f"{self.author} post at {self.timestamp}"

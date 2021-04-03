@@ -1,5 +1,27 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    TODO
+    {% if not posts %}
+    No posts found
+    {% endif %}
+
+    {% for post in posts %}
+        <div class="posts card border-primary" style="max-width: 45rem;">
+            <div class="card-header">{{ post.timestamp }}</div>
+            <div class="card-body text-primary">
+                <h5 class="card-title">{{ post.author.username }} says: </h5>
+                <p class="card-text">{{ post.content }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-primary"> 
+                {% if user.is_authenticated and user.username != post.author.username %}
+                    {% if user not in post.liked_by.all %}
+                        <a href="#"> LIKE </a> 
+                    {% else %}
+                        <a href="#"> UNLIKE </a> 
+                    {% endif %}
+                {% endif %}    
+                Likes: {{ post.likes }}
+            </div>      
+        </div>
+    {% endfor %}
 {% endblock %}

@@ -4,11 +4,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Post
 
 
 def index(request):
-    return render(request, "network/index.html")
+    # Display all posts on the home page in reverse chronological order
+    return render(request, "network/index.html", {"posts": Post.objects.all().order_by('-timestamp')})
 
 
 def login_view(request):
