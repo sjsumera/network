@@ -1,27 +1,42 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+    {% if user.is_authenticated %}
+        <div class="posts card border-primary" style="max-width: 45rem;">
+            <div class="card-header">What's on your mind?</div>
+            <div class="card-body text-primary">
+                <form action={% url 'post' %} method='POST'>
+                    {% csrf_token %}
+                    <textarea class="post-content" name="content"></textarea>
+                    <div class="card-footer bg-transparent border-primary"> 
+                        <input type="submit" class="submit-post btn btn-primary"/>
+                    </div>    
+                </form>
+            </div>
+        </div>
+
+    {% endif %}
     {% if not posts %}
     No posts found
-    {% endif %}
-
-    {% for post in posts %}
-        <div class="posts card border-primary" style="max-width: 45rem;">
-            <div class="card-header">{{ post.timestamp }}</div>
-            <div class="card-body text-primary">
-                <h5 class="card-title">{{ post.author.username }} says: </h5>
-                <p class="card-text">{{ post.content }}</p>
+    {% else %}
+        {% for post in posts %}
+            <div class="posts card border-primary" style="max-width: 45rem;">
+                <div class="card-header">{{ post.timestamp }}</div>
+                <div class="card-body text-primary">
+                    <h5 class="card-title">{{ post.author.username }} says: </h5>
+                    <p class="card-text">{{ post.content }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-primary"> 
+                    {% if user.is_authenticated and user.username != post.author.username %}
+                        {% if user not in post.liked_by.all %}
+                            <a href="#"> LIKE </a> 
+                        {% else %}
+                            <a href="#"> UNLIKE </a> 
+                        {% endif %}
+                    {% endif %}    
+                    Likes: {{ post.likes }}
+                </div>      
             </div>
-            <div class="card-footer bg-transparent border-primary"> 
-                {% if user.is_authenticated and user.username != post.author.username %}
-                    {% if user not in post.liked_by.all %}
-                        <a href="#"> LIKE </a> 
-                    {% else %}
-                        <a href="#"> UNLIKE </a> 
-                    {% endif %}
-                {% endif %}    
-                Likes: {{ post.likes }}
-            </div>      
-        </div>
-    {% endfor %}
+        {% endfor %}
+    {% endif %}
 {% endblock %}

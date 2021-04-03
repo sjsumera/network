@@ -5,3 +5,13 @@
 a {
     color: red;
 }
+
+textarea {
+    max-width: 42rem;
+    width: 100%;
+    height: 100%;
+}
+
+.submit-post {
+    float: right;
+}

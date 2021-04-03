@@ -62,3 +62,15 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def post(request):
+    """
+    Create a new post from a user. 
+    """
+    if request.method =="POST":
+        post = Post()
+        post.content = request.POST['content']
+        post.author = request.user
+        post.save()
+        return HttpResponseRedirect(reverse("index"))
