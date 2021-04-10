@@ -11,15 +11,17 @@ from django.db import models
 
 class User(AbstractUser):
     """
-    Create many to many relationship for users a person is following
+    Many to many relationship for who a user is following. Documentation on symmetrical: https://docs.djangoproject.com/en/3.1/ref/models/fields/#django.db.models.ManyToManyField.symmetrical
     """
-    followees = models.ManyToManyField(
-        "self",
+    following = models.ManyToManyField(
+        'self',
         blank=True,
-        related_name="followees"
+        symmetrical=False
     )
+
     def __str__(self):
         return f"{self.id} {self.username}"
+
 
 class Post(models.Model):
     """

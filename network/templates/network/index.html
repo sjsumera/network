@@ -29,9 +29,9 @@
                 <div class="card-footer bg-transparent border-primary"> 
                     {% if user.is_authenticated and user.username != post.author.username %}
                         {% if user not in post.liked_by.all %}
-                            <a href="#"> LIKE </a> 
+                            <span id="like"> LIKE </span> 
                         {% else %}
-                            <a href="#"> UNLIKE </a> 
+                            <span id="unlike">UNLIKE </span> 
                         {% endif %}
                     {% endif %}    
                     Likes: {{ post.likes }}

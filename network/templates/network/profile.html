@@ -1,0 +1,20 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    {% if profile %}
+        <div class="information"> 
+            <h1> {{ profile.username }} </h1>
+            <div class="following">Following: {{ profile.following.count }}</div> 
+            <div class="followers">Followers: {{ followers.count }} </div>
+            {% if user.is_authenticated and user != profile %}
+                {% if user in followers %}
+                    <button class="btn btn-primary"> Unfollow </button>
+                {% else %}
+                    <button class="btn btn-primary"> Follow </button>
+                {% endif %}    
+            {% endif %}
+        </div>
+    {% else %}
+        Profile doesn't exist!
+    {% endif %}
+{% endblock %}
