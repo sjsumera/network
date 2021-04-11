@@ -16,27 +16,6 @@
         </div>
 
     {% endif %}
-    {% if not posts %}
-    No posts found
-    {% else %}
-        {% for post in posts %}
-            <div class="posts card border-primary" style="max-width: 45rem;">
-                <div class="card-header">{{ post.timestamp }}</div>
-                <div class="card-body text-primary">
-                    <h5 class="card-title">{{ post.author.username }} says: </h5>
-                    <p class="card-text">{{ post.content }}</p>
-                </div>
-                <div class="card-footer bg-transparent border-primary"> 
-                    {% if user.is_authenticated and user.username != post.author.username %}
-                        {% if user not in post.liked_by.all %}
-                            <span id="like"> LIKE </span> 
-                        {% else %}
-                            <span id="unlike">UNLIKE </span> 
-                        {% endif %}
-                    {% endif %}    
-                    Likes: {{ post.likes }}
-                </div>      
-            </div>
-        {% endfor %}
-    {% endif %}
+    {% include "network/post_layout.html" %}
+
 {% endblock %}

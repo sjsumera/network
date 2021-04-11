@@ -1,0 +1,40 @@
+
+    {% if not posts %}
+        <div class="posts">
+            No posts found :( 
+        </div>
+    {% else %}
+        {% for post in posts %}
+            <div class="posts card border-primary" style="max-width: 45rem;">
+                <div class="card-header">{{ post.timestamp }}</div>
+                <div class="card-body text-primary">
+                    <h5 class="card-title"><a  href="{% url 'profile' post.author.username %}">{{ post.author.username }} </a> says: </h5>
+                    <p class="card-text">{{ post.content }}</p>
+                </div>
+                <div class="card-footer bg-transparent border-primary"> 
+                    {% if user.is_authenticated and user.username != post.author.username %}
+                        {% if user not in post.liked_by.all %}
+                            <span id="like" data-id={{ post.id }}> LIKE </span> 
+                        {% else %}
+                            <span id="unlike">UNLIKE </span> 
+                        {% endif %}
+                    {% endif %}    
+                    Likes: {{ post.likes }}
+                </div>      
+            </div>
+        {% endfor %}
+
+        <nav aria-label="post navigation" class="posts">
+            <ul class="pagination">
+            {% if posts.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">&laquo; First </a></li>
+                <li class="page-item"> <a class="page-link" href="?page={{ posts.previous_page_number }}">Previous</a></li>
+            {% endif %}
+
+            {% if posts.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ posts.next_page_number }}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ posts.paginator.num_pages }}">Last &raquo;</a></li>
+            {% endif %}
+            </ul>
+        </nav>
+    {% endif %}

@@ -1,19 +1,25 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
- 
+from django.core.paginator import Paginator
 
 
 from .models import User, Post
 
 
 def index(request):
+    # Documentation: https://docs.djangoproject.com/en/3.0/topics/pagination/
+    posts = Post.objects.all().order_by('-timestamp')
+    paginator = Paginator(posts, 10)
+
+    page_number = request.GET.get('page')
+    page_object = paginator.get_page(page_number)
     # Display all posts on the home page in reverse chronological order
-    return render(request, "network/index.html", {"posts": Post.objects.all().order_by('-timestamp')})
+    return render(request, "network/index.html", {"posts": page_object})
 
 
 def login_view(request):
@@ -87,7 +93,7 @@ def like(request, post_id):
     user = request.user
     post = Post.objects.get(id=post_id)
     # If user already liked, decrement the like count and remove as 'liker'
-    if user in post.liked_by.all:
+    if user in post.liked_by.all():
         post.liked_by.remove(user)
         post.likes -= 1
         post.save()
@@ -95,7 +101,10 @@ def like(request, post_id):
     else:
         post.liked_by.add(user)
         post.likes += 1
-        post.save 
+        post.save() 
+
+    return HttpResponseRedirect(reverse("index"))    
+
 
 def profile(request, username):
     # Get profile information for a user. Use iexact for case-insensitive query
@@ -105,6 +114,47 @@ def profile(request, username):
         profile = None
         return render(request, "network/profile.html", {"profile": profile})
 
+    # Find all users following the user whose profile being visited 
     followers = User.objects.filter(following=profile.id)
 
-    return render(request, "network/profile.html", {"profile": profile, "followers": followers})
+    # Get posts for users and put in paginator format 
+    posts = Post.objects.filter(author=profile).order_by('-timestamp')
+    paginator = Paginator(posts, 10)
+
+    page_number = request.GET.get('page')
+    page_object = paginator.get_page(page_number)
+
+    return render(request, "network/profile.html", {"profile": profile, "followers": followers, "posts": page_object})
+
+@login_required(login_url='login')
+def following(request):
+    """
+    Get user then determine who the user is following in order to grab all posts from people they follow.
+    """
+    user = request.user 
+    posts = Post.objects.filter(author__in=user.following.all()).order_by('-timestamp')
+
+    paginator = Paginator(posts, 10)
+
+    page_number = request.GET.get('page')
+    page_object = paginator.get_page(page_number)
+
+    return render(request, "network/following.html", {"posts": page_object})
+
+
+def update_followers(request, profile_id):
+    """"
+    Add and remove followers when button is clicked on profile page
+    """
+    user = request.user
+    profile = User.objects.get(id=profile_id)
+
+    if profile in user.following.all():
+        user.following.remove(profile.id)
+        user.save()
+    else:
+        user.following.add(profile.id)
+        user.save()
+    
+    return HttpResponseRedirect(reverse("profile", kwargs={"username": profile.username}))
+
