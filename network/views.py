@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -6,8 +8,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
-
-
+from django.views.decorators.csrf import csrf_exempt
 from .models import User, Post
 
 
@@ -85,26 +86,45 @@ def post(request):
         post.save()
         return HttpResponseRedirect(reverse("index"))
 
-# Needs work, not done, but moving onto profil page. 
+@csrf_exempt
+@login_required(login_url='login')
 def like(request, post_id):
     """
-    Like or unlike post then update the database
+    Like or unlike post then update the database. 
     """
-    user = request.user
-    post = Post.objects.get(id=post_id)
-    # If user already liked, decrement the like count and remove as 'liker'
-    if user in post.liked_by.all():
-        post.liked_by.remove(user)
-        post.likes -= 1
-        post.save()
-    # Else increase like count and add user    
-    else:
-        post.liked_by.add(user)
-        post.likes += 1
-        post.save() 
+    if request.method == "PUT":
+        liked = None
+        user = request.user
+        post = Post.objects.get(id=post_id)
+        # If user already liked, decrement the like count and remove as 'liker'
+        if user in post.liked_by.all():
+            post.liked_by.remove(user)
+            post.likes -= 1
+            post.save()
+            liked = False
+        # Else increase like count and add user    
+        else:
+            post.liked_by.add(user)
+            post.likes += 1
+            post.save()
+            liked = True 
+        # needs to return json response
+        return JsonResponse({"total_likes": post.likes, "liked": liked })
 
-    return HttpResponseRedirect(reverse("index"))    
 
+@csrf_exempt
+@login_required(login_url='login')
+def save_edit(request, post_id, new_content):
+    if request.method == "PUT":
+        user = request.user
+        post = Post.objects.get(id=post_id)
+        # Check to make sure user attempting edit is author
+        if user == post.author:
+            post.content = new_content
+            post.save()
+            return JsonResponse({"content": post.content})        
+        else: 
+            return JsonResponse({"message": "Not authorized to edit"})    
 
 def profile(request, username):
     # Get profile information for a user. Use iexact for case-insensitive query
@@ -157,4 +177,3 @@ def update_followers(request, profile_id):
         user.save()
     
     return HttpResponseRedirect(reverse("profile", kwargs={"username": profile.username}))
-

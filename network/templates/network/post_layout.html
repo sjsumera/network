@@ -9,17 +9,20 @@
                 <div class="card-header">{{ post.timestamp }}</div>
                 <div class="card-body text-primary">
                     <h5 class="card-title"><a  href="{% url 'profile' post.author.username %}">{{ post.author.username }} </a> says: </h5>
-                    <p class="card-text">{{ post.content }}</p>
+                    <p class="card-text edit" id="post-{{ post.id }}" data-edit-id={{ post.id }}> {{ post.content }} </span>
+                    </p>
+                    <div class="btn btn-primary"> Edit Post </div>  
                 </div>
                 <div class="card-footer bg-transparent border-primary"> 
                     {% if user.is_authenticated and user.username != post.author.username %}
                         {% if user not in post.liked_by.all %}
-                            <span id="like" data-id={{ post.id }}> LIKE </span> 
+                            <span data-post-id={{ post.id }} class="like"> LIKE  Total Likes: {{ post.likes }} </span> 
                         {% else %}
-                            <span id="unlike">UNLIKE </span> 
+                            <span data-post-id={{ post.id }} class="like"> UNLIKE Total Likes: {{ post.likes }} </span> 
                         {% endif %}
+                    {% else %} 
+                        Total Likes: {{ post.likes }}
                     {% endif %}    
-                    Likes: {{ post.likes }}
                 </div>      
             </div>
         {% endfor %}
