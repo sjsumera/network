@@ -1,11 +1,13 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+    <!-- If profile exists, render information about the user-->
     {% if profile %}
         <div class="posts"> 
             <h1> {{ profile.username }} </h1>
             <div class="following">Following: {{ profile.following.count }}</div> 
             <div class="followers">Followers: {{ followers.count }} </div>
+            <!-- Allow logged in users to follow/unfollow other users-->
             {% if user.is_authenticated and user != profile %}
                 <a href="{% url 'update_followers' profile.id %}"> 
                 {% if user in followers %}

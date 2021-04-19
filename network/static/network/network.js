@@ -3,51 +3,61 @@ document.addEventListener('DOMContentLoaded', function() {
     liking and unliking posts */
     const likes = document.querySelectorAll('.like');
     likes.forEach(function(post) {
-        post.addEventListener("click", () => like_request(post))
+        post.addEventListener("click", () => like_request(post.dataset.postId));
     });
 
+    /* For all elements with class of edit (buttons), add event listener for processing edits */
     const edit = document.querySelectorAll(".edit");
     edit.forEach(function(post) {
-        post.addEventListener("click", () => edit_post(post))
+        post.addEventListener("click", () => edit_post(post.dataset.postId));
     });
 });
 
-// Calls function to like / unlike a post
-function like_request(post) {
-    fetch(`like/${post.dataset.postId}`, {
+// Calls view that handles liking and unliking posts 
+function like_request(post_id) {
+    fetch(`like/${post_id}`, {
         method: 'PUT'
     })
     .then(response => response.json())
 	.then(data => {
+        const content = document.querySelector(`#total-${post_id}`);
         if (data.liked === true) {
-		    post.innerHTML = "UNLIKE " + "Total Likes: " + data.total_likes
+            document.querySelector(`#like-${post_id}`).innerHTML = "Unlike";
+		    content.innerHTML = " Total Likes: " + data.total_likes;
         } else {
-            post.innerHTML = "LIKE " + "Total Likes: " + data.total_likes
+            document.querySelector(`#like-${post_id}`).innerHTML = "Like";
+            content.innerHTML = " Total Likes: " + data.total_likes;
         }
 	});
 }
 
-function edit_post(post) {
-    let newText = document.createElement("textarea");
-    let saveBtn = document.createElement("button");
-    saveBtn.innerHTML = "Save Changes";
+// Function that handles editing of post 
+function edit_post(post_id) {
+    const editBtn = document.querySelector(`#edit-${post_id}`);
+    const post = document.querySelector(`#post-${post_id}`);
+    const newText = document.querySelector(`#text-${post_id}`);
+    const saveBtn = document.querySelector(`#save-${post_id}`);
+    editBtn.style.display = 'none';
+    newText.style.display = 'block';
+    saveBtn.style.display = 'inline';
     newText.value = post.innerHTML;
-    // save.addEventListener('click', () => save_edit(post, newText))
-    post.innerHTML = ''
-    post.parentElement.append(newText);
-    post.parentElement.append(saveBtn);
+    post.innerHTML = '';
 
+    /* Process saving post edits and displaying appropriate buttons / new text. 
+    "../" to ensure edits can be made whether on profile page or home page */ 
     saveBtn.addEventListener('click', () => {
-        console.log(post, newText.value);
-        fetch(`save_edit/${post.dataset.editId}/${newText.value}`, {
-        method: 'PUT'
+        fetch(`../save_edit/${post.dataset.postId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                content: newText.value
+            })
         })
         .then(response => response.json())
 	    .then(data => {
-            console.log(data);
-            newText.remove();
-            post.append(data.content);
-            saveBtn.remove();
+            post.innerHTML = data.content;
+            editBtn.style.display = 'inline';
+            saveBtn.style.display = 'none';
+            newText.style.display = 'none';
 	    });
     });
 }

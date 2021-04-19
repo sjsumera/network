@@ -2,7 +2,7 @@
     margin: 20px;
 }
 
-a {
+.user-link {
     color: red;
 }
 
@@ -12,6 +12,14 @@ textarea {
     height: 100%;
 }
 
+.edit-textarea {
+    display: none;
+}
+
 .submit-post {
     float: right;
+}
+
+.save { 
+    display: none;
 }

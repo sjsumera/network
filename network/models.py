@@ -1,6 +1,6 @@
 """
-Added validator to ensure likes never drops below 0 
-https://docs.djangoproject.com/en/3.1/ref/validators/#module-django.core.validators 
+Added validator to ensure likes never drops below 0
+https://docs.djangoproject.com/en/3.1/ref/validators/#module-django.core.validators
 """
 
 from django.contrib.auth.models import AbstractUser
@@ -11,7 +11,9 @@ from django.db import models
 
 class User(AbstractUser):
     """
-    Many to many relationship for who a user is following. Documentation on symmetrical: https://docs.djangoproject.com/en/3.1/ref/models/fields/#django.db.models.ManyToManyField.symmetrical
+    Many to many relationship for who a user is following. Documentation on
+    symmetrical: https://docs.djangoproject.com/en/3.1/ref/models/
+    fields/#django.db.models.ManyToManyField.symmetrical
     """
     following = models.ManyToManyField(
         'self',
@@ -46,8 +48,9 @@ class Post(models.Model):
     )
     liked_by = models.ManyToManyField(
         User,
-        blank=True, 
+        blank=True,
         related_name="liked_by",
     )
+
     def __str__(self):
         return f"{self.author} post at {self.timestamp}"

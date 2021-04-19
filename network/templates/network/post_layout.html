@@ -4,29 +4,39 @@
             No posts found :( 
         </div>
     {% else %}
+        <!--Render posts based on data being passed in. Template used for any page that renders posts -->
         {% for post in posts %}
             <div class="posts card border-primary" style="max-width: 45rem;">
                 <div class="card-header">{{ post.timestamp }}</div>
                 <div class="card-body text-primary">
-                    <h5 class="card-title"><a  href="{% url 'profile' post.author.username %}">{{ post.author.username }} </a> says: </h5>
-                    <p class="card-text edit" id="post-{{ post.id }}" data-edit-id={{ post.id }}> {{ post.content }} </span>
-                    </p>
-                    <div class="btn btn-primary"> Edit Post </div>  
+                    <h5 class="card-title">
+                        <a class="user-link" href="{% url 'profile' post.author.username %}">{{ post.author.username }} </a> says: 
+                    </h5>
+                    <p class="card-text" id="post-{{ post.id }}" data-post-id={{ post.id }}> {{ post.content }} </p>
+                    <!-- if post was written by logged in user, allow them to edit the post-->
+                    {% if user.is_authenticated and user.username == post.author.username %}
+                        <div class="btn btn-primary edit" id="edit-{{ post.id }}" data-post-id={{ post.id }}> Edit Post </div>
+                        <textarea class="edit-textarea" id="text-{{ post.id }}"></textarea>
+                        <div class="btn btn-primary save" class="save" id="save-{{ post.id }}"> Save Changes </div>   
+                    {% endif %}    
                 </div>
+                <!-- if post wasn't written by logged in user, allow them to like/unlike post. If not, just show total likes-->
                 <div class="card-footer bg-transparent border-primary"> 
                     {% if user.is_authenticated and user.username != post.author.username %}
+                        <button class="btn btn-primary like" id="like-{{ post.id }}" data-post-id={{ post.id }}>
                         {% if user not in post.liked_by.all %}
-                            <span data-post-id={{ post.id }} class="like"> LIKE  Total Likes: {{ post.likes }} </span> 
+                            Like 
                         {% else %}
-                            <span data-post-id={{ post.id }} class="like"> UNLIKE Total Likes: {{ post.likes }} </span> 
+                            Unlike
                         {% endif %}
-                    {% else %} 
-                        Total Likes: {{ post.likes }}
-                    {% endif %}    
+                        </button>
+                    {% endif %}
+                    <span id="total-{{post.id}}" class="like"> Total Likes: {{ post.likes }} </span>     
                 </div>      
             </div>
         {% endfor %}
 
+        <!--Paginator, based off of bootstrap documentation for handling pagination -->
         <nav aria-label="post navigation" class="posts">
             <ul class="pagination">
             {% if posts.has_previous %}
